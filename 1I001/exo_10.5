@@ -1,0 +1,52 @@
+#Ex 10.5
+
+Grandes_Lignes={'Paris': {'Strasbourg', 'Dijon', 'Toulouse', 'Lille', 'Lyon', 'Bordeaux'}, 'Strasbourg': {'Paris', 'Dijon', 'Munchen'}, 'Munchen': {'Strasbourg'}, 'Dijon': {'Paris', 'Strasbourg', 'Lyon', 'Toulouse'}, 'Lyon': {'Paris', 'Dijon', 'Toulouse'}, 'Toulouse': {'Paris', 'Lyon', 'Dijon', 'Bordeaux'}, 'Bordeaux': {'Nantes', 'Paris'}, 'Nantes': {'Paris', 'Bordeaux', 'Quimper'}, 'Quimper': {'Nantes'}, 'Ajaccio': {'Bastia'}, 'Bastia': {'Ajaccio'}}
+
+def trajet_direct(carte,st1,st2):
+    """ dict[str:str]*str*str->bool"""
+    if st1 in carte and st2 in carte[st1]:
+        return True
+    return False
+assert trajet_direct(Grandes_Lignes,'Paris','Bordeaux')==True
+
+def ajout_station(st, corr, carte):
+    """set[str]*str*str->dict[str: str]"""
+    copie=dict()
+    for e in carte:
+        copie[e]=carte[e]
+    copie[st]=corr #rajout de la ville + corresp
+    for s in corr: #rajout de la ville en tant que corresp pr chacune des villes
+        copie[s].add(st)
+    return copie
+
+Nouvelles_Lignes=ajout_station('Limoges', {'Paris', 'Toulouse', 'Bordeaux'}, Grandes_Lignes)
+assert trajet_direct(Nouvelles_Lignes,'Limoges','Paris')==True
+
+def stations_atteignables(carte, depart, k):
+    """dict[str: str]*str*int->set[str]"""
+    #0 correspondance : gare de départ. 1 correspondance: gares atteignables depuis la gare depart
+    E1={depart}
+    if k==0: #convention
+        return E1
+    E2=set() #correspondances à E1
+    for e in carte[depart]: #assignation des correspondances de E1 dans E2 (ensemble arrivée)
+        E2.add(e)
+    for i in range(1, k):
+        for s1 in E2: #e2->e1
+            E1.add(s1)
+        E2=set()
+        for s2 in E1: #(correspondances e2)->e2
+            if s2 in carte:
+                for s3 in carte[s2]:
+                    E2.add(s3)
+    return E2
+
+#Jeu de tests
+Grandes_Lignes={'Paris': {'Strasbourg', 'Dijon', 'Toulouse', 'Lille', 'Lyon', 'Bordeaux'}, 'Strasbourg': {'Paris', 'Dijon', 'Munchen'}, 'Munchen': {'Strasbourg'}, 'Dijon': {'Paris', 'Strasbourg', 'Lyon', 'Toulouse'}, 'Lyon': {'Paris', 'Dijon', 'Toulouse'}, 'Toulouse': {'Paris', 'Lyon', 'Dijon', 'Bordeaux'}, 'Bordeaux': {'Nantes', 'Paris'}, 'Nantes': {'Paris', 'Bordeaux', 'Quimper'}, 'Quimper': {'Nantes'}, 'Ajaccio': {'Bastia'}, 'Bastia': {'Ajaccio'}}
+assert stations_atteignables(Grandes_Lignes, 'Paris', 0)=={'Paris'}
+assert stations_atteignables(Grandes_Lignes, 'Paris', 1)=={'Strasbourg', 'Dijon', 'Toulouse', 'Lille', 'Lyon', 'Bordeaux'}
+assert stations_atteignables(Grandes_Lignes, 'Dijon', 2)=={'Strasbourg', 'Dijon', 'Toulouse', 'Lille', 'Lyon', 'Bordeaux', 'Paris', 'Munchen'}
+assert stations_atteignables(Grandes_Lignes, 'Paris', 2)=={'Paris', 'Bordeaux', 'Strasbourg', 'Nantes', 'Munchen', 'Lyon', 'Dijon', 'Toulouse'} #j'ai rajouté Lille car si on part de Paris, on va à Strasbourg, de Strasbourg on retourne à Paris
+
+
+
